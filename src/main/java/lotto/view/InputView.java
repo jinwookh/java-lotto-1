@@ -1,7 +1,5 @@
 package lotto.view;
 
-import lotto.domain.lotto.Lotto;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,20 +35,16 @@ public class InputView {
         return Integer.parseInt(userInput);
     }
 
-    public static List<Integer> askManualLotto() {
-        System.out.println("수동구매 로또 번호를 입력하세요");
-        List<String> inputs = Arrays.asList(reader.nextLine().split(SEPERATOR));
-        List<Integer> lottoNumbers = new ArrayList<>();
-
-        inputs.forEach(input -> lottoNumbers.add(Integer.parseInt(input)));
-        return lottoNumbers;
-    }
-
-    public static List<Lotto> askManualLottos(int manualLottoNumber) {
-        List<Lotto> manualLottos = new ArrayList<>();
+    public static List<String> askManualLottos(int manualLottoNumber) {
+        List<String> manualLottos = new ArrayList<>();
         for (int i = 0; i < manualLottoNumber; i++) {
-            manualLottos.add(new Lotto(askManualLotto()));
+            manualLottos.add(askManualLotto());
         }
         return manualLottos;
+    }
+
+    public static String askManualLotto() {
+        System.out.println("수동구매 로또 번호를 입력하세요");
+        return reader.nextLine();
     }
 }

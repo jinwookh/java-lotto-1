@@ -28,10 +28,7 @@ public class WebUILottoApplication {
             int recentId = winningLottoDBhandler.getRecentId();
             List<String> buttonIds = createNames(recentId, "");
 
-            Map<String, Object> model = new HashMap<>();
-            model.put("buttonIds", buttonIds);
-            model.put("empty", buttonIds.isEmpty());
-
+            Map<String, Object> model = getButtonIdModel(buttonIds);
             return render(model, "history.html");
         });
 
@@ -44,17 +41,7 @@ public class WebUILottoApplication {
             LottoResult lottoResult = LottoResult.create
                     (Money.create(lottos.size() * Lotto.PRICE), lottos.getPrizes(winningLotto));
 
-
-            Map<String, Object> model = new HashMap<>();
-            List<PrizeInfoDTO> prizeInfoDTOs = createPrizeInfoDTOs(lottoResult);
-            model.put("prizeInfos", prizeInfoDTOs);
-            model.put("profitRate", lottoResult.getProfitRate());
-            model.put("lottos", lottos.getLottosList());
-            model.put("winningLotto", winningLotto.getWinningLotto());
-            model.put("bonusNumber", winningLotto.getBonusNumber());
-            model.put("profit", lottoResult.getProfit());
-            model.put("expense", lottos.size() * Lotto.PRICE);
-            model.put("round", round);
+            Map<String, Object> model = getLottoResultModel(round, winningLotto, lottos, lottoResult);
 
             return render(model, "history_specific.html");
         });
@@ -78,15 +65,11 @@ public class WebUILottoApplication {
             Money money = req.session().attribute("money");
             int manualLottoCount = req.session().attribute("manualLottoCount");
 
-            List<Lotto> manualLottos = generateManualLottos(req, manualLottoCount);
+            List<String> manualLottos = generateManualLottos(req, manualLottoCount);
             Lottos lottos = LottoMachine
                     .generateLottos(manualLottos, money);
 
-            Map<String, Object> model = new HashMap<>();
-            model.put("lottos", lottos.getLottosList());
-            model.put("manualLottoCount", manualLottoCount);
-            model.put("automaticLottoCount", lottos.getLottosList().size()
-                    - manualLottoCount);
+            Map<String, Object> model = getLottosModel(manualLottoCount, lottos);
 
             req.session().attribute("lottos", lottos);
 
@@ -109,11 +92,7 @@ public class WebUILottoApplication {
             lottosDBHandler.add(lottos, winningLottoDBhandler.getRecentId() + 1);
             winningLottoDBhandler.add(winningLotto);
 
-            Map<String, Object> model = new HashMap<>();
-
-            List<PrizeInfoDTO> prizeInfoDTOs = createPrizeInfoDTOs(lottoResult);
-            model.put("prizeInfos", prizeInfoDTOs);
-            model.put("profitRate", lottoResult.getProfitRate());
+            Map<String, Object> model = getPrizeInfoModel(lottoResult);
             return render(model, "result.html");
         });
 
@@ -122,6 +101,42 @@ public class WebUILottoApplication {
             model.put("error", true);
             return render(model, "index.html");
         });
+    }
+
+    private static Map<String, Object> getLottosModel(int manualLottoCount, Lottos lottos) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("lottos", lottos.getLottosList());
+        model.put("manualLottoCount", manualLottoCount);
+        model.put("automaticLottoCount", lottos.getLottosList().size()
+                - manualLottoCount);
+        return model;
+    }
+
+    private static Map<String, Object> getPrizeInfoModel(LottoResult lottoResult) {
+        Map<String, Object> model = new HashMap<>();
+
+        List<PrizeInfoDTO> prizeInfoDTOs = createPrizeInfoDTOs(lottoResult);
+        model.put("prizeInfos", prizeInfoDTOs);
+        model.put("profitRate", lottoResult.getProfitRate());
+        return model;
+    }
+
+    private static Map<String, Object> getLottoResultModel(int round, WinningLotto winningLotto, Lottos lottos, LottoResult lottoResult) {
+        Map<String, Object> model = new HashMap(getPrizeInfoModel(lottoResult));
+        model.put("lottos", lottos.getLottosList());
+        model.put("winningLotto", winningLotto.getWinningLotto());
+        model.put("bonusNumber", winningLotto.getBonusNumber());
+        model.put("profit", lottoResult.getProfit());
+        model.put("expense", lottos.size() * Lotto.PRICE);
+        model.put("round", round);
+        return model;
+    }
+
+    private static Map<String, Object> getButtonIdModel(List<String> buttonIds) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("buttonIds", buttonIds);
+        model.put("empty", buttonIds.isEmpty());
+        return model;
     }
 
     private static List<PrizeInfoDTO> createPrizeInfoDTOs(LottoResult lottoResult) {
@@ -141,14 +156,13 @@ public class WebUILottoApplication {
         return tagNames;
     }
 
-    private static List<Lotto> generateManualLottos(Request req, int manualLottoCount) {
-        List<Lotto> manualLottos = new ArrayList<>();
+    private static List<String> generateManualLottos(Request req, int manualLottoCount) {
+        List<String> inputs = new ArrayList<>();
         for (int i = 1; i <= manualLottoCount; i++) {
-            List<String> tokens = Arrays.asList(req.queryParams("manualLotto" + i).split(","));
-            List<Integer> lottoNumbers = convertTokensToNumbers(tokens);
-            manualLottos.add(new Lotto(lottoNumbers));
+            String input = req.queryParams("manualLotto" + i);
+            inputs.add(input);
         }
-        return manualLottos;
+        return inputs;
     }
 
     private static List<Integer> convertTokensToNumbers(List<String> tokens) {
