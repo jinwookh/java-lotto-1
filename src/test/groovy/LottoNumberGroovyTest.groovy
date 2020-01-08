@@ -4,7 +4,7 @@ import lotto.domain.lotto.LottoNumber
 import lotto.domain.lotto.exception.IllegalLottoNumberException
 import spock.lang.Specification
 
-class LottoNumberGroovyTest extends Specification{
+class LottoNumberGroovyTest extends Specification {
     def "lottoNumber 생성"() {
         when:
         LottoNumber lottoNumber = new LottoNumber(3);
