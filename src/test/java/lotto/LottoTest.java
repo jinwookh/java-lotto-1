@@ -19,7 +19,6 @@ public class LottoTest {
 
     @Test
     public void 숫자_중복_로또() {
-
         assertThrows(IllegalNumberCombinationException.class, () -> {
             new Lotto(Arrays.asList(1, 2, 3, 4, 5, 5));
         });
