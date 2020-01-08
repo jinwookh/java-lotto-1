@@ -7,24 +7,22 @@ import spock.lang.Specification
 
 class LottoResultTest extends Specification {
 
-    def "수익률"(List<Integer> numbers, List<Integer> winningNumbers) {
+    def "수익률"(List<Integer> numbers, List<Integer> winningNumbers, int bonusNumber, double result) {
         given:
-        List<Lotto> lottos = new ArrayList<>();
-        lottos.add(new Lotto(numbers));
-        Lottos lottosCollection = new Lottos(lottos);
-        WinningLotto winningLotto = WinningLotto.create(winningNumbers, 16);
+        List<Lotto> lottos = new ArrayList<>()
+        lottos.add(new Lotto(numbers))
+        Lottos lottosCollection = new Lottos(lottos)
+        WinningLotto winningLotto = WinningLotto.create(winningNumbers, bonusNumber)
+        Money money = Money.create(1000)
+        LottoResult lottoResult = LottoResult.create(money, lottosCollection.getPrizes(winningLotto))
 
-        Money money = Money.create(1000);
-
-        when:
-        LottoResult lottoResult = LottoResult.create(money, lottosCollection.getPrizes(winningLotto));
-
-        then:
-        lottoResult.getProfitRate() == 0
+        expect:
+        lottoResult.getProfitRate() == result
 
         where:
-        lotto                   | winningLotto          | money         || expected
-        [1,2,3,4,5,6]            []
+        numbers            | winningNumbers        | bonusNumber || result
+        [1, 2, 3, 4, 5, 6] | [7, 8, 9, 10, 11, 12] | 16          || 0
+        [1, 2, 3, 4, 5, 6] | [1, 2, 3, 4, 5, 7]    | 16          || 150000
 
 
     }
