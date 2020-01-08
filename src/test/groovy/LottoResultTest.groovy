@@ -23,7 +23,7 @@ class LottoResultTest extends Specification {
         numbers            | winningNumbers        | bonusNumber || result
         [1, 2, 3, 4, 5, 6] | [7, 8, 9, 10, 11, 12] | 16          || 0
         [1, 2, 3, 4, 5, 6] | [1, 2, 3, 4, 5, 7]    | 16          || 150000
-
+        [1, 2, 3, 4, 5, 6] | [1, 2, 3, 7, 8, 9]    | 16          || 500
 
     }
 }
